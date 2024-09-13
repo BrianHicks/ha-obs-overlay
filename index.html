@@ -7,49 +7,53 @@
                 padding: 0;
                 box-sizing: border-box;
                 font-family: sans-serif;
-                color: #334155;
             }
 
-            #metrics {
+            #bar {
                 position: absolute;
-                top: 5vh;
-                right: 4vw;
-                font-size: 7vh;
-                font-weight: bold;
+                width: 100%;
+                color: #f4f4f5;
+                font-size: 5vh;
+                padding: 1vh 2vh 1vh 2vh;
                 text-align: right;
+                font-weight: bold;
+                transition: all 1s ease-in-out;
             }
-
-            dt.label {
+            #bar.co2-ok {
                 opacity: 0.8;
-                font-size: 0.5em;
-                margin-top: 1em;
+                top: -6vh;
+                background-color: #047857;
+            }
+            #bar.co2-warning {
+                opacity: 0.9;
+                top: 0;
+                background-color: #eab308;
+            }
+            #bar.co2-danger {
+                opacity: 1;
+                top: 0;
+                background-color: #b91c1c;
             }
 
+            .label {
+                opacity: 0.8;
+                font-size: 0.3em;
+            }
+
+            #co2 {
+                padding-bottom: 0.1em;
+            }
             #co2::before {
                 content: "●";
                 padding-right: 0.1em;
-            }
-            .co2-ok {
-                color: #047857;
-            }
-            .co2-warning {
-                color: #eab308;
-            }
-            .co2-danger {
-                color: #b91c1c;
             }
         </style>
     </head>
 
     <body>
-        <div id="metrics">
-            <dl>
-                <dt class="label">Desk CO<sub>2</sub> PPM</dt>
-                <dd id="co2"></dd>
-
-                <dt class="label">Steps</dt>
-                <dd id="steps"></dd>
-            </dl>
+        <div id="bar">
+            <div id="co2"></div>
+            <div class="label">Office CO<sub>2</sub></div>
         </div>
 
         <script>
@@ -57,33 +61,23 @@
                 fetch("/state/co2")
                     .then((response) => response.json())
                     .then((data) => {
-                        const el = document.getElementById("co2");
-                        el.innerText = data.state;
+                        const meter = document.getElementById("co2");
+                        meter.innerText = data.state;
 
+                        const bar = document.getElementById("bar");
                         const co2 = parseInt(data.state.replace(",", ""), 10);
                         if (co2 < 900) {
-                            el.className = "co2-ok";
+                            bar.className = "co2-ok";
                         } else if (co2 < 1000) {
-                            el.className = "co2-warning";
+                            bar.className = "co2-warning";
                         } else {
-                            el.className = "co2-danger";
+                            bar.className = "co2-danger";
                         }
                     });
             }
 
-            function updateSteps() {
-                fetch("/state/steps")
-                    .then((response) => response.json())
-                    .then((data) => {
-                        document.getElementById("steps").innerText = data.state;
-                    });
-            }
-
             updateCo2();
-            updateSteps();
-
             setInterval(updateCo2, 1000 * 60);
-            setInterval(updateSteps, 1000 * 5);
         </script>
     </body>
 </html>
