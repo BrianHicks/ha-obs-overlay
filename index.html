@@ -1,2 +1,87 @@
-<!DOCTYPE html>
-<html></html>
+<!doctype html>
+<html>
+    <head>
+        <style>
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+                font-family: sans-serif;
+                color: #334155;
+            }
+
+            #metrics {
+                position: absolute;
+                bottom: 5vh;
+                left: 4vw;
+                font-size: 8vh;
+                font-weight: bold;
+            }
+
+            dt.label {
+                opacity: 0.8;
+                font-size: 0.5em;
+                margin-top: 0.5em;
+            }
+            dt.label::after {
+                content: ":";
+            }
+
+            .co2-ok {
+                color: #047857;
+            }
+            .co2-warning {
+                color: #eab308;
+            }
+            .co2-warning {
+                color: #b91c1c;
+            }
+        </style>
+    </head>
+
+    <body>
+        <div id="metrics">
+            <dl>
+                <dt class="label">CO<sub>2</sub> PPM</dt>
+                <dd id="co2"></dd>
+
+                <dt class="label">Steps</dt>
+                <dd id="steps"></dd>
+            </dl>
+        </div>
+
+        <script>
+            function updateCo2() {
+                fetch("/state/co2")
+                    .then((response) => response.json())
+                    .then((data) => {
+                        const el = document.getElementById("co2");
+                        el.innerText = data.state;
+
+                        const co2 = parseInt(data.state.replace(",", ""), 10);
+                        if (co2 < 900) {
+                            el.className = "co2-ok";
+                        } else if (co2 < 1000) {
+                            el.className = "co2-warning";
+                        } else {
+                            el.className = "co2-danger";
+                        }
+                    });
+            }
+
+            function updateSteps() {
+                fetch("/state/steps")
+                    .then((response) => response.json())
+                    .then((data) => {
+                        document.getElementById("steps").innerText = data.state;
+                    });
+            }
+
+            updateCo2();
+            updateSteps();
+
+            setInterval(updateCo2, 1000 * 60);
+            setInterval(updateSteps, 1000 * 5);
+        </script>
+    </body>
+</html>
