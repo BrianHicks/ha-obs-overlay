@@ -2,13 +2,18 @@ package main
 
 import (
 	"fmt"
-	"io"
 	"net/http"
+	"os"
 )
 
 func main() {
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		io.WriteString(w, "Hello, World!")
+		html, err := os.ReadFile("index.html")
+		if err != nil {
+			http.Error(w, "Error reading index.html", http.StatusInternalServerError)
+			return
+		}
+		w.Write(html)
 	})
 
 	err := http.ListenAndServe(":9999", nil)
